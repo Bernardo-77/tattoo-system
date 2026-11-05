@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octávio Tattoo - Impressão</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .container { background: #1e1e1e; padding: 30px; border-radius: 16px; width: 100%; max-width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); border: 1px solid #333; }
+        h2 { text-align: center; margin-bottom: 25px; color: #fff; font-weight: 600; letter-spacing: 1px; }
+        
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #aaa; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .radio-group { display: flex; gap: 10px; margin-bottom: 25px; background: #2a2a2a; padding: 10px; border-radius: 8px; }
+        .radio-group label { display: flex; align-items: center; font-weight: normal; color: #ddd; cursor: pointer; margin: 0; text-transform: none; font-size: 13px; flex: 1; justify-content: center; }
+        .radio-group input[type="radio"] { margin-right: 6px; accent-color: #d32f2f; transform: scale(1.2); }
+
+        input[type="text"], input[type="file"], select { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 15px; transition: 0.3s; outline: none; }
+        input[type="text"]:focus, select:focus { border-color: #d32f2f; }
+        input[type="file"]::file-selector-button { background: #444; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin-right: 15px; font-weight: bold; transition: 0.3s; }
+        input[type="file"]::file-selector-button:hover { background: #555; }
+        
+        .hidden { display: none !important; }
+
+        optgroup { background: #1a1a1a; color: #d32f2f; font-weight: bold; }
+        option { background: #2a2a2a; color: #fff; font-weight: normal; }
+
+        /* Botão Principal */
+        button { width: 100%; padding: 15px; background: #d32f2f; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        button:hover { background: #b71c1c; transform: translateY(-2px); }
+        button:disabled { background: #555; cursor: not-allowed; transform: none; }
+
+        /* Botão Recarregar (Pequeno) */
+        .reload-btn {
+            width: auto;
+            padding: 8px 12px;
+            font-size: 12px;
+            background: #444;
+            margin-bottom: 20px;
+            display: inline-block;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .reload-btn:hover { background: #555; transform: none; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1000; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-box { background: #1e1e1e; padding: 40px 30px; border-radius: 20px; text-align: center; max-width: 350px; width: 90%; box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 1px solid #333; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; margin-top: 20px; }
+        .modal-title.success { color: #4caf50; }
+        .modal-title.error { color: #f44336; }
+        .modal-message { color: #aaa; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+        .modal-btn { padding: 12px 30px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; width: 100%; }
+        .modal-btn.success { background: #4caf50; color: white; }
+        .modal-btn.success:hover { background: #388e3c; }
+        .modal-btn.error { background: #f44336; color: white; }
+        .modal-btn.error:hover { background: #d32f2f; }
+
+        .spinner { border: 4px solid #333; border-top: 4px solid #d32f2f; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .icon-container { width: 80px; height: 80px; margin: 0 auto; position: relative; display: flex; justify-content: center; align-items: center; }
+        .icon-circle { width: 80px; height: 80px; border-radius: 50%; border: 4px solid; display: flex; justify-content: center; align-items: center; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .icon-circle.success { border-color: #4caf50; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3); }
+        .icon-circle.error { border-color: #f44336; box-shadow: 0 0 20px rgba(244, 67, 54, 0.3); }
+        .checkmark { width: 30px; height: 15px; border-left: 4px solid #4caf50; border-bottom: 4px solid #4caf50; transform: rotate(-45deg) translate(2px, -2px); animation: drawCheck 0.4s ease-out 0.3s forwards; opacity: 0; }
+        @keyframes drawCheck { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 30px; height: 15px; opacity: 1; } }
+        .crossmark { position: relative; width: 30px; height: 30px; transform: rotate(45deg); }
+        .crossmark::before, .crossmark::after { content: ''; position: absolute; background-color: #f44336; border-radius: 2px; animation: drawCross 0.3s ease-out 0.2s forwards; opacity: 0; }
+        .crossmark::before { width: 4px; height: 30px; left: 50%; transform: translateX(-50%); }
+        .crossmark::after { height: 4px; width: 30px; top: 50%; transform: translateY(-50%); }
+        @keyframes drawCross { 0% { opacity: 0; transform: scale(0); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Impressão de Stencil</h2>
+    
+    <label>O que deseja imprimir?</label>
+    <div class="radio-group">
+        <label><input type="radio" name="printOption" value="text" onchange="toggleFileInput()"> Só Nome</label>
+        <label><input type="radio" name="printOption" value="image" onchange="toggleFileInput()"> Só Imagem</label>
+        <label><input type="radio" name="printOption" value="both" checked onchange="toggleFileInput()"> Nome + Imagem</label>
+    </div>
+
+    <div id="nameGroup">
+        <label for="clientName">Nome do Cliente:</label>
+        <input type="text" id="clientName" placeholder="Ex: João Silva">
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <label for="fontSelect">Tipo de Letra:</label>
+            <button class="reload-btn" onclick="reloadFonts()">🔄 Recarregar Fontes</button>
+        </div>
+        <select id="fontSelect">
+            <option value="">A carregar fontes...</option>
+        </select>
+    </div>
+
+    <div id="imageGroup">
+        <label for="imageInput">Selecionar Imagem:</label>
+        <input type="file" id="imageInput" accept="image/*">
+    </div>
+
+    <button id="printBtn" onclick="printImage()">IMPRIMIR AGORA</button>
+</div>
+
+<div class="modal-overlay" id="systemModal">
+    <div class="modal-box">
+        <div id="modalContent"></div>
+        <button class="modal-btn" id="modalCloseBtn" onclick="closeModal()">FECHAR</button>
+    </div>
+</div>
+
+<script>
+    async function loadFonts() {
+        const select = document.getElementById('fontSelect');
+        try {
+            const res = await fetch('http://localhost:3000/fonts');
+            const grouped = await res.json();
+            select.innerHTML = '';
+            const sortedCategories = Object.keys(grouped);
+            if (sortedCategories.length === 0) {
+                select.innerHTML = '<option value="">Nenhuma fonte encontrada</option>';
+                return;
+            }
+            for (const category of sortedCategories) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = `── ${category} ──`;
+                for (const font of grouped[category]) {
+                    const option = document.createElement('option');
+                    option.value = font;
+                    option.textContent = font.replace(/-Regular$/, '').replace(/-Book$/, '').replace(/([a-z])([A-Z])/g, '$1 $2');
+                    optgroup.appendChild(option);
+                }
+                select.appendChild(optgroup);
+            }
+        } catch (error) {
+            select.innerHTML = '<option value="BebasNeue-Regular">Bebas Neue (padrão)</option>';
+        }
+    }
+
+    // ✅ NOVA FUNÇÃO: Avisa o servidor para limpar o cache e recarrega
+    async function reloadFonts() {
+        const btn = document.querySelector('.reload-btn');
+        btn.innerText = "⏳ A recarregar...";
+        btn.disabled = true;
+        try {
+            await fetch('http://localhost:3000/reload-fonts', { method: 'POST' });
+            await loadFonts();
+        } catch (e) {
+            console.error(e);
+        } finally {
+            btn.innerText = "🔄 Recarregar Fontes";
+            btn.disabled = false;
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadFonts);
+
+    const modalOverlay = document.getElementById('systemModal');
+    const modalContent = document.getElementById('modalContent');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+    function showModal(type, title, message) {
+        modalOverlay.classList.add('active');
+        let btnClass = type === 'success' ? 'success' : 'error';
+        let iconHTML = type === 'success' 
+            ? `<div class="icon-container"><div class="icon-circle success"><div class="checkmark"></div></div></div>`
+            : `<div class="icon-container"><div class="icon-circle error"><div class="crossmark"></div></div></div>`;
+        modalContent.innerHTML = `${iconHTML}<div class="modal-title ${type}">${title}</div><div class="modal-message">${message}</div>`;
+        modalCloseBtn.className = `modal-btn ${btnClass}`;
+    }
+
+    function closeModal() { modalOverlay.classList.remove('active'); }
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+
+    function setLoading(isLoading) {
+        const btn = document.getElementById('printBtn');
+        if (isLoading) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;border-width:3px;margin:0 auto;display:inline-block;vertical-align:middle;"></span> A IMPRIMIR...';
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = 'IMPRIMIR AGORA';
+        }
+    }
+
+    function toggleFileInput() {
+        const option = document.querySelector('input[name="printOption"]:checked').value;
+        const nameGroup = document.getElementById('nameGroup');
+        const imageGroup = document.getElementById('imageGroup');
+        if (option === 'text') { nameGroup.classList.remove('hidden'); imageGroup.classList.add('hidden'); }
+        else if (option === 'image') { nameGroup.classList.add('hidden'); imageGroup.classList.remove('hidden'); }
+        else { nameGroup.classList.remove('hidden'); imageGroup.classList.remove('hidden'); }
+    }
+
+    async function printImage() {
+        const option = document.querySelector('input[name="printOption"]:checked').value;
+        const clientName = document.getElementById('clientName').value;
+        const fontSelect = document.getElementById('fontSelect');
+        const selectedFont = fontSelect.value;
+        const fileInput = document.getElementById('imageInput');
+
+        if ((option === 'text' || option === 'both') && !clientName.trim()) {
+            showModal('error', 'Atenção', 'Por favor, digita o nome do cliente antes de imprimir.');
+            return;
+        }
+        if ((option === 'image' || option === 'both') && fileInput.files.length === 0) {
+            showModal('error', 'Atenção', 'Por favor, seleciona uma imagem primeiro.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('clientName', clientName);
+        formData.append('printOption', option);
+        formData.append('fontName', selectedFont);
+        if (fileInput.files.length > 0) formData.append('image', fileInput.files[0]);
+
+        setLoading(true);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        try {
+            const response = await fetch('http://localhost:3000/print', {
+                method: 'POST',
+                body: formData,
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Erro do servidor (${response.status})`);
+            }
+
+            showModal('success', 'Impressão Concluída!', 'O stencil foi enviado para a impressora com sucesso.');
+            document.getElementById('clientName').value = '';
+            document.getElementById('imageInput').value = '';
+
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                showModal('error', 'Tempo Esgotado', 'O servidor demorou muito a responder.');
+            } else if (error.message.includes('Failed to fetch')) {
+                showModal('error', 'Erro de Ligação', 'Não foi possível contactar o servidor local.');
+            } else {
+                showModal('error', 'Erro na Impressão', error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
+</script>
+</body>
+</html>

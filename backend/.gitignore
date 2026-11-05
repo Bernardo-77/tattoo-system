@@ -1,0 +1,36 @@
+node_modules/
+fonts/
+fontconfig-cache/
+temp_*.png
+temp_font_*.ttf
+fonts.conf
+.env
+.DS_Store
+npm-debug.log
+
+
+
+
+
+
+
+
+
+
+# 1. Iniciar o repositório Git
+git init
+
+# 2. Adicionar todos os ficheiros (ele vai ignorar as pastas que estão no .gitignore)
+git add .
+
+# 3. Criar a primeira "versão" do código
+git commit -m "Sistema de impressao de stencil - Versao Windows"
+
+# 4. Mudar o nome da branch principal para 'main'
+git branch -M main
+
+# 5. Ligar o teu projeto local ao repositório que criaste no GitHub
+git remote add origin https://github.com/Bernardo-77/tattoo-system.git
+
+# 6. Enviar o código para o GitHub
+git push -u origin main
